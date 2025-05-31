@@ -1,0 +1,42 @@
+﻿@page
+@model WebApplication1.Pages.KitchenModel
+@{
+    ViewData["Title"] = "廚房訂單";
+}
+
+<h1>目前收到的訂單</h1>
+
+
+
+@if (Model.Orders.Count == 0)
+{
+    <p>目前沒有訂單。</p>
+}
+else
+{
+    <ul>
+        @foreach (var order in Model.Orders)
+        {
+            <li>訂單時間: @order.Timestamp.ToString("HH:mm:ss")，數量: @order.Count</li>
+        }
+    </ul>
+}
+
+<p><a href="/">返回點餐頁面</a></p>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/orderHub")
+        .build();
+
+    connection.start().then(() => {
+        console.log("Kitchen connected");
+    });
+
+    // 當收到新訂單通知，就自動重新整理
+    connection.on("NewOrder", () => {
+        location.reload();
+    });
+</script>

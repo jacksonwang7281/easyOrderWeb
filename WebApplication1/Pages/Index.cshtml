@@ -1,0 +1,70 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "點餐計數器";
+}
+
+<h1>點餐計數器</h1>
+
+<form method="post">
+    <div>
+        <button type="button" id="minusBtn">-</button>
+        <span id="counterDisplay">0</span>
+        <button type="button" id="plusBtn">+</button>
+    </div>
+
+    <!-- 隱藏的 input 欄位，實際送出這個值給後端 -->
+    <input type="hidden" id="counter" name="counter" value="0" />
+
+    <br />
+    <button type="submit">送出</button>
+
+    <p><a href="/Kitchen">前往廚房頁面</a></p>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/orderHub")
+        .build();
+
+    connection.start().then(() => {
+        console.log("SignalR connected");
+    });
+
+    // 在送出按鈕之後通知 hub
+    document.querySelector("form").addEventListener("submit", function () {
+        connection.invoke("SendAsync", "NewOrder");
+    });
+</script>
+
+
+@if (Model.Submitted)
+{
+    <p style="color: green;">你送出了數量：@Model.Counter</p>
+}
+
+<script>
+    let counter = 0;
+    const min = 0;
+    const max = 10;
+
+    const counterDisplay = document.getElementById("counterDisplay");
+    const hiddenInput = document.getElementById("counter");
+
+    document.getElementById("plusBtn").addEventListener("click", () => {
+        if (counter < max) {
+            counter++;
+            counterDisplay.textContent = counter;
+            hiddenInput.value = counter;
+        }
+    });
+
+    document.getElementById("minusBtn").addEventListener("click", () => {
+        if (counter > min) {
+            counter--;
+            counterDisplay.textContent = counter;
+            hiddenInput.value = counter;
+        }
+    });
+</script>
