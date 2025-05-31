@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: easyOrderWeb
+    env: docker
+    plan: free
+    autoDeploy: true
