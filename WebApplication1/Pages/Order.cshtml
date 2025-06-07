@@ -1,31 +1,38 @@
 ﻿@page "{restaurantId}"
 @model WebApplication1.Pages.OrderModel
 @{
-    ViewData["Title"] = "點餐計數器";
+    ViewData["Title"] = "點餐頁面";
 }
 
-<h1>點餐計數器 - @Model.RestaurantId</h1>
+<h1>點餐 - @Model.RestaurantId</h1>
 
 <form method="post">
-    <div>
-        <button type="button" id="minusBtn">-</button>
-        <span id="counterDisplay">0</span>
-        <button type="button" id="plusBtn">+</button>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+        @for (int i = 0; i < Model.MenuItems.Count; i++)
+        {
+            var item = Model.MenuItems[i];
+            <div style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                <img src="/images/@item.ImageFile" alt="@item.Name" width="150" height="150" />
+                <h3>@item.Name</h3>
+                <button type="button" onclick="decrease(@i)">-</button>
+                <span id="qty_@i">0</span>
+                <button type="button" onclick="increase(@i)">+</button>
+                <input type="hidden" name="Quantities" id="input_@i" value="0" />
+            </div>
+        }
     </div>
 
-    <input type="hidden" id="counter" name="counter" value="0" />
     <input type="hidden" name="restaurantId" value="@Model.RestaurantId" />
-
     <br />
-    <button type="submit">送出</button>
-
-    <p><a href="/Kitchen/@Model.RestaurantId">前往廚房頁面</a></p>
+    <button type="submit">送出訂單</button>
 </form>
 
 @if (Model.Submitted)
 {
-    <p style="color: green;">你送出了數量：@Model.Counter</p>
+    <p style="color: green;">訂單已送出！</p>
 }
+
+<p><a href="/Kitchen/@Model.RestaurantId">前往廚房頁面</a></p>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
@@ -41,26 +48,25 @@
         connection.invoke("SendAsync", "NewOrder_@Model.RestaurantId");
     });
 
-    let counter = 0;
-    const min = 0;
-    const max = 10;
-
-    const counterDisplay = document.getElementById("counterDisplay");
-    const hiddenInput = document.getElementById("counter");
-
-    document.getElementById("plusBtn").addEventListener("click", () => {
-        if (counter < max) {
-            counter++;
-            counterDisplay.textContent = counter;
-            hiddenInput.value = counter;
+    function increase(id) {
+        const qtySpan = document.getElementById(`qty_${id}`);
+        const input = document.getElementById(`input_${id}`);
+        let value = parseInt(qtySpan.textContent) || 0;
+        if (value < 99) {
+            value++;
+            qtySpan.textContent = value;
+            input.value = value;
         }
-    });
+    }
 
-    document.getElementById("minusBtn").addEventListener("click", () => {
-        if (counter > min) {
-            counter--;
-            counterDisplay.textContent = counter;
-            hiddenInput.value = counter;
+    function decrease(id) {
+        const qtySpan = document.getElementById(`qty_${id}`);
+        const input = document.getElementById(`input_${id}`);
+        let value = parseInt(qtySpan.textContent) || 0;
+        if (value > 0) {
+            value--;
+            qtySpan.textContent = value;
+            input.value = value;
         }
-    });
+    }
 </script>
