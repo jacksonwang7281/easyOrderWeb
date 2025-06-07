@@ -1,12 +1,10 @@
-﻿@page
+﻿@page "{restaurantId}"
 @model WebApplication1.Pages.KitchenModel
 @{
     ViewData["Title"] = "廚房訂單";
 }
 
-<h1>目前收到的訂單</h1>
-
-
+<h1>目前收到的訂單 - @Model.RestaurantId</h1>
 
 @if (Model.Orders.Count == 0)
 {
@@ -22,8 +20,7 @@ else
     </ul>
 }
 
-<p><a href="/">返回點餐頁面</a></p>
-
+<a href="/Order?restaurantId=@Model.RestaurantId">返回點餐頁面</a>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
@@ -35,8 +32,7 @@ else
         console.log("Kitchen connected");
     });
 
-    // 當收到新訂單通知，就自動重新整理
-    connection.on("NewOrder", () => {
+    connection.on("NewOrder_@Model.RestaurantId", () => {
         location.reload();
     });
 </script>
