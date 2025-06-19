@@ -50,15 +50,25 @@ namespace WebApplication1.Pages
 
             int total = Quantities.Sum();
 
+            var items = new Dictionary<string, int>();
+            for (int i = 0; i < Quantities.Count; i++)
+            {
+                if (Quantities[i] > 0)
+                {
+                    items[MenuItems[i].Name] = Quantities[i];
+                }
+            }
+
             OrderStorage.AddOrder(RestaurantId, new Order
             {
                 Count = total,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
+                Items = items
             });
 
             await _hubContext.Clients.All.SendAsync($"NewOrder_{RestaurantId}");
 
-            return new JsonResult(new { success = true }); // 確保是 JSON 結果
+            return new JsonResult(new { success = true });
         }
     }
 }

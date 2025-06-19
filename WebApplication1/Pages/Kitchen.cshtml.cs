@@ -13,6 +13,12 @@ namespace WebApplication1.Pages
         public void OnGet()
         {
             Orders = OrderStorage.GetOrders(RestaurantId);
+
+            foreach (var order in Orders)
+            {
+                order.Items ??= new Dictionary<string, int>();
+            }
+
         }
     }
 }

@@ -5,6 +5,8 @@ public class Order
 {
     public int Count { get; set; }
     public DateTime Timestamp { get; set; }
+
+    public Dictionary<string, int> Items { get; set; } = new(); // 餐點名稱與數量
 }
 
 public static class OrderStorage

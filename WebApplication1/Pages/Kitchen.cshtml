@@ -12,12 +12,21 @@
 }
 else
 {
-    <ul>
-        @foreach (var order in Model.Orders)
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        @foreach (var order in Model.Orders.OrderByDescending(o => o.Timestamp))
         {
-            <li>訂單時間: @order.Timestamp.ToString("HH:mm:ss")，數量: @order.Count</li>
+            <div style="border: 2px solid #444; padding: 15px; border-radius: 10px; background-color: #f9f9f9;">
+                <strong>訂單時間：</strong>@order.Timestamp.ToString("HH:mm:ss")<br />
+                <strong>內容：</strong>
+                <ul style="margin-top: 8px;">
+                    @foreach (var item in order.Items)
+                    {
+                        <li>@item.Key x @item.Value</li>
+                    }
+                </ul>
+            </div>
         }
-    </ul>
+    </div>
 }
 
 <a href="/Order?restaurantId=@Model.RestaurantId">返回點餐頁面</a>
