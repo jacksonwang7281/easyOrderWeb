@@ -4,6 +4,49 @@
     ViewData["Title"] = "廚房訂單";
 }
 
+@{
+    var css = @"
+    <style>
+    .order-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 10px;
+    }
+
+    .order-card {
+        border: 2px solid #444;
+        padding: 15px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        animation: slideIn 0.5s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .order-card {
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
+    </style>";
+}
+
+@Html.Raw(css)
+
 <h1>目前收到的訂單 - @Model.RestaurantId</h1>
 
 @if (Model.Orders.Count == 0)
@@ -12,10 +55,10 @@
 }
 else
 {
-    <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="order-list" id="orderList">
         @foreach (var order in Model.Orders.OrderByDescending(o => o.Timestamp))
         {
-            <div style="border: 2px solid #444; padding: 15px; border-radius: 10px; background-color: #f9f9f9;">
+            <div class="order-card" data-timestamp="@order.Timestamp.Ticks">
                 <strong>訂單時間：</strong>@order.Timestamp.ToString("HH:mm:ss")<br />
                 <strong>內容：</strong>
                 <ul style="margin-top: 8px;">
@@ -33,15 +76,49 @@ else
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/orderHub")
-        .build();
+    const orderList = document.getElementById("orderList");
 
-    connection.start().then(() => {
-        console.log("Kitchen connected");
+    // SignalR 訂閱（已有，保留）
+    connection.on("NewOrder_@Model.RestaurantId", () => {
+        location.reload(); // 可改成 AJAX append 實現更絲滑效果（可之後升級）
     });
 
-    connection.on("NewOrder_@Model.RestaurantId", () => {
-        location.reload();
+    // === 滑動刪除功能 ===
+    let startX = 0;
+    let currentX = 0;
+
+    orderList.addEventListener("touchstart", e => {
+        const card = e.target.closest(".order-card");
+        if (!card) return;
+        startX = e.touches[0].clientX;
+        card.style.transition = "none";
+    });
+
+    orderList.addEventListener("touchmove", e => {
+        const card = e.target.closest(".order-card");
+        if (!card) return;
+        currentX = e.touches[0].clientX;
+        const delta = currentX - startX;
+        if (delta > 0) {
+            card.style.transform = `translateX(${delta}px)`;
+        }
+    });
+
+    orderList.addEventListener("touchend", e => {
+        const card = e.target.closest(".order-card");
+        if (!card) return;
+        const delta = currentX - startX;
+        if (delta > 100) {
+            // 滑超過 100px，就刪除
+            card.style.transition = "all 0.3s ease";
+            card.style.transform = "translateX(100%)";
+            card.style.opacity = "0";
+            setTimeout(() => {
+                card.remove();
+            }, 300);
+        } else {
+            card.style.transition = "all 0.3s ease";
+            card.style.transform = "translateX(0)";
+        }
     });
 </script>
