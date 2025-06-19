@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+ï»¿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
 
@@ -32,16 +32,16 @@ namespace WebApplication1.Pages
 
         public List<MenuItem> MenuItems { get; set; } = new()
     {
-        new MenuItem { Id = 0, Name = "º~³ù", ImageFile = "burger.jpg" },
-        new MenuItem { Id = 1, Name = "©ÜÂÄ", ImageFile = "pizza.jpg" },
-        new MenuItem { Id = 2, Name = "¬µÂû", ImageFile = "fried_chicken.jpg" },
-        new MenuItem { Id = 3, Name = "¥i¼Ö", ImageFile = "cola.jpg" },
-        new MenuItem { Id = 4, Name = "¸q¤j§QÄÑ", ImageFile = "pasta.jpg" },
-        new MenuItem { Id = 5, Name = "¨F©Ô", ImageFile = "salad.jpg" },
-        new MenuItem { Id = 6, Name = "¤û±Æ", ImageFile = "steak.jpg" },
-        new MenuItem { Id = 7, Name = "³J¿|", ImageFile = "cake.jpg" },
-        new MenuItem { Id = 8, Name = "¦B²N²O", ImageFile = "icecream.jpg" },
-        new MenuItem { Id = 9, Name = "´ö", ImageFile = "soup.jpg" }
+        new MenuItem { Id = 0, Name = "æ¼¢å ¡", ImageFile = "burger.jpg" },
+        new MenuItem { Id = 1, Name = "æŠ«è–©", ImageFile = "pizza.jpg" },
+        new MenuItem { Id = 2, Name = "ç‚¸é›", ImageFile = "fried_chicken.jpg" },
+        new MenuItem { Id = 3, Name = "å¯æ¨‚", ImageFile = "cola.jpg" },
+        new MenuItem { Id = 4, Name = "ç¾©å¤§åˆ©éºµ", ImageFile = "pasta.jpg" },
+        new MenuItem { Id = 5, Name = "æ²™æ‹‰", ImageFile = "salad.jpg" },
+        new MenuItem { Id = 6, Name = "ç‰›æ’", ImageFile = "steak.jpg" },
+        new MenuItem { Id = 7, Name = "è›‹ç³•", ImageFile = "cake.jpg" },
+        new MenuItem { Id = 8, Name = "å†°æ·‡æ·‹", ImageFile = "icecream.jpg" },
+        new MenuItem { Id = 9, Name = "æ¹¯", ImageFile = "soup.jpg" }
     };
 
         public async Task<IActionResult> OnPostAsync()
@@ -58,7 +58,7 @@ namespace WebApplication1.Pages
 
             await _hubContext.Clients.All.SendAsync($"NewOrder_{RestaurantId}");
 
-            return new JsonResult(new { success = true }); // ½T«O¬O JSON µ²ªG
+            return new JsonResult(new { success = true }); // ç¢ºä¿æ˜¯ JSON çµæœ
         }
     }
 }
