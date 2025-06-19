@@ -23,6 +23,8 @@
         animation: slideIn 0.5s ease;
         position: relative;
         overflow: hidden;
+        touch-action: pan-y;
+        user-select: none;
     }
 
     @keyframes slideIn {
@@ -44,7 +46,6 @@
     }
     </style>";
 }
-
 @Html.Raw(css)
 
 <h1>目前收到的訂單 - @Model.RestaurantId</h1>
@@ -78,24 +79,30 @@ else
 <script>
     const orderList = document.getElementById("orderList");
 
-    // SignalR 訂閱（已有，保留）
-    connection.on("NewOrder_@Model.RestaurantId", () => {
-        location.reload(); // 可改成 AJAX append 實現更絲滑效果（可之後升級）
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/orderHub")
+        .build();
+
+    connection.start().then(() => {
+        console.log("Kitchen connected");
+
+        connection.on("NewOrder_@Model.RestaurantId", () => {
+            location.reload(); // 或改為 append DOM (進階)
+        });
     });
 
-    // === 滑動刪除功能 ===
     let startX = 0;
     let currentX = 0;
+    let card = null;
 
     orderList.addEventListener("touchstart", e => {
-        const card = e.target.closest(".order-card");
+        card = e.target.closest(".order-card");
         if (!card) return;
         startX = e.touches[0].clientX;
         card.style.transition = "none";
     });
 
     orderList.addEventListener("touchmove", e => {
-        const card = e.target.closest(".order-card");
         if (!card) return;
         currentX = e.touches[0].clientX;
         const delta = currentX - startX;
@@ -105,20 +112,17 @@ else
     });
 
     orderList.addEventListener("touchend", e => {
-        const card = e.target.closest(".order-card");
         if (!card) return;
         const delta = currentX - startX;
         if (delta > 100) {
-            // 滑超過 100px，就刪除
             card.style.transition = "all 0.3s ease";
             card.style.transform = "translateX(100%)";
             card.style.opacity = "0";
-            setTimeout(() => {
-                card.remove();
-            }, 300);
+            setTimeout(() => card.remove(), 300);
         } else {
             card.style.transition = "all 0.3s ease";
             card.style.transform = "translateX(0)";
         }
+        card = null;
     });
 </script>
