@@ -6,7 +6,8 @@
 
 <h1>點餐 - @Model.RestaurantId</h1>
 
-<form method="post">
+<form id="orderForm" method="post">
+    @Html.AntiForgeryToken() <!-- 加入防偽 Token -->
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
         @for (int i = 0; i < Model.MenuItems.Count; i++)
         {
@@ -27,11 +28,6 @@
     <button type="submit">送出訂單</button>
 </form>
 
-@if (Model.Submitted)
-{
-    <p style="color: green;">訂單已送出！</p>
-}
-
 <p><a href="/Kitchen/@Model.RestaurantId">前往廚房頁面</a></p>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
@@ -44,8 +40,34 @@
         console.log("SignalR connected");
     });
 
-    document.querySelector("form").addEventListener("submit", function () {
-        connection.invoke("SendAsync", "NewOrder_@Model.RestaurantId");
+    document.getElementById("orderForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const form = this;
+        const formData = new FormData(form);
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'RequestVerificationToken': token
+            }
+        });
+
+        if (response.ok) {
+            alert("訂單已送出！");
+            const count = @Model.MenuItems.Count;
+            for (let i = 0; i < count; i++) {
+                document.getElementById(`qty_${i}`).textContent = "0";
+                document.getElementById(`input_${i}`).value = "0";
+            }
+
+
+        } else {
+            alert("送出失敗！");
+        }
     });
 
     function increase(id) {

@@ -58,7 +58,7 @@ namespace WebApplication1.Pages
 
             await _hubContext.Clients.All.SendAsync($"NewOrder_{RestaurantId}");
 
-            return Page();
+            return new JsonResult(new { success = true }); // 確保是 JSON 結果
         }
     }
 }
