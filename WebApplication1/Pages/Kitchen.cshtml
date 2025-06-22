@@ -59,7 +59,7 @@ else
     <div class="order-list" id="orderList">
         @foreach (var order in Model.Orders.OrderByDescending(o => o.Timestamp))
         {
-            <div class="order-card" data-timestamp="@order.Timestamp.Ticks">
+            <div class="order-card" data-id="@order.Id.ToString()">
                 <strong>訂單時間：</strong>@order.Timestamp.ToString("HH:mm:ss")<br />
                 <strong>內容：</strong>
                 <ul style="margin-top: 8px;">
@@ -84,16 +84,30 @@ else
         .build();
 
     connection.start().then(() => {
-        console.log("Kitchen connected");
+        console.log("✅ Kitchen connected");
 
         connection.on("NewOrder_@Model.RestaurantId", () => {
-            location.reload(); // 或改為 append DOM (進階)
+            location.reload();
         });
     });
 
     let startX = 0;
     let currentX = 0;
     let card = null;
+
+    function handleSwipeDelete(cardElement) {
+        const id = cardElement.dataset.id;
+        console.log("🗑️ 準備刪除 ID:", id);
+
+        cardElement.style.transition = "all 0.3s ease";
+        cardElement.style.transform = "translateX(100%)";
+        cardElement.style.opacity = "0";
+
+        setTimeout(() => {
+            cardElement.remove();
+            removeOrderFromServer(id);
+        }, 300);
+    }
 
     orderList.addEventListener("touchstart", e => {
         card = e.target.closest(".order-card");
@@ -111,18 +125,71 @@ else
         }
     });
 
-    orderList.addEventListener("touchend", e => {
+    orderList.addEventListener("touchend", () => {
         if (!card) return;
         const delta = currentX - startX;
         if (delta > 100) {
-            card.style.transition = "all 0.3s ease";
-            card.style.transform = "translateX(100%)";
-            card.style.opacity = "0";
-            setTimeout(() => card.remove(), 300);
+            handleSwipeDelete(card);
         } else {
             card.style.transition = "all 0.3s ease";
             card.style.transform = "translateX(0)";
         }
         card = null;
     });
+
+    orderList.addEventListener("mousedown", e => {
+        card = e.target.closest(".order-card");
+        if (!card) return;
+        startX = e.clientX;
+        card.style.transition = "none";
+
+        const onMouseMove = e => {
+            currentX = e.clientX;
+            const delta = currentX - startX;
+            if (delta > 0) {
+                card.style.transform = `translateX(${delta}px)`;
+            }
+        };
+
+        const onMouseUp = e => {
+            const delta = currentX - startX;
+            if (delta > 100) {
+                handleSwipeDelete(card);
+            } else {
+                card.style.transition = "all 0.3s ease";
+                card.style.transform = "translateX(0)";
+            }
+
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+            card = null;
+        };
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+    });
+
+    function removeOrderFromServer(id) {
+        const url = `${window.location.pathname}?handler=Remove`;
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(id)
+        }).then(async res => {
+            if (res.ok) {
+                const result = await res.json();
+                if (result.success) {
+                    console.log("✅ 後端刪除成功");
+                } else {
+                    alert("❌ 刪除失敗");
+                }
+            } else {
+                console.error("❌ 伺服器回傳錯誤狀態", res.status);
+                alert("❌ 刪除失敗，請稍後再試");
+            }
+        }).catch(err => {
+            console.error("❌ 傳送錯誤", err);
+        });
+    }
 </script>
