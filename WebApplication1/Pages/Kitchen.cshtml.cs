@@ -26,6 +26,17 @@ namespace WebApplication1.Pages
             return new JsonResult(new { success = true });
         }
 
+        public async Task<IActionResult> OnPostRemoveTableAsync([FromBody] string tableNumber)
+        {
+            var restaurantId = RouteData.Values["restaurantId"]?.ToString();
+            if (string.IsNullOrEmpty(restaurantId) || string.IsNullOrEmpty(tableNumber))
+                return new JsonResult(new { success = false });
+
+            Console.WriteLine($"🔴 移除整桌訂單：{tableNumber}");
+            OrderStorage.RemoveOrdersByTable(restaurantId, tableNumber);
+            return new JsonResult(new { success = true });
+        }
+
         public void OnGet()
         {
             Orders = OrderStorage.GetOrders(RestaurantId);

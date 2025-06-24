@@ -45,6 +45,19 @@ public static class OrderStorage
         }
     }
 
+    public static void RemoveOrdersByTable(string restaurantId, string tableNumber)
+    {
+        if (_orders.TryGetValue(restaurantId, out var list))
+        {
+            var toRemove = list.Where(o => o.TableNumber == tableNumber).ToList();
+            foreach (var o in toRemove)
+            {
+                list.Remove(o);
+                Console.WriteLine($"✅ 移除桌號 {tableNumber} 的訂單 ID: {o.Id}");
+            }
+        }
+    }
+
     public static List<Order> GetOrders(string restaurantId)
     {
         return _orders.ContainsKey(restaurantId) ? _orders[restaurantId] : new List<Order>();
