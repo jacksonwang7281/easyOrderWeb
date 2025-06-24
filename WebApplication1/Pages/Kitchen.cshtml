@@ -61,6 +61,7 @@ else
         {
             <div class="order-card" data-id="@order.Id.ToString()">
                 <strong>訂單時間：</strong>@order.Timestamp.ToString("HH:mm:ss")<br />
+                <strong>桌號：</strong>@order.TableNumber<br />
                 <strong>內容：</strong>
                 <ul style="margin-top: 8px;">
                     @foreach (var item in order.Items)

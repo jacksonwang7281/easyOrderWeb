@@ -17,6 +17,9 @@ namespace WebApplication1.Pages
     {
         private readonly IHubContext<OrderHub> _hubContext;
 
+        [BindProperty(SupportsGet = true)]
+        public string TableNumber { get; set; } = "";
+
         public OrderModel(IHubContext<OrderHub> hubContext)
         {
             _hubContext = hubContext;
@@ -63,7 +66,8 @@ namespace WebApplication1.Pages
             {
                 Count = total,
                 Timestamp = DateTime.Now,
-                Items = items
+                Items = items,
+                TableNumber = TableNumber // 👈 加上桌號
             });
 
             await _hubContext.Clients.All.SendAsync($"NewOrder_{RestaurantId}");

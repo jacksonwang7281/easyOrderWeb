@@ -7,6 +7,8 @@ public class Order
     public int Count { get; set; }
     public DateTime Timestamp { get; set; }
     public Dictionary<string, int> Items { get; set; } = new();
+
+    public string TableNumber { get; set; } = "";
 }
 
 public static class OrderStorage
